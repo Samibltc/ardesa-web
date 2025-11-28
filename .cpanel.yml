@@ -14,16 +14,20 @@ deployment:
 
     # Prepare Passenger (Phusion) config to serve the app from this repo dir
     - export REPO_PATH="$(pwd)"
-    # Adjust if your domain docroot is different
-    - export DEPLOY_PATH="$HOME/public_html"
+    # Common docroots: primary domain often public_html; some hosts use ~/DOMAIN
+    - export DOCROOT1="$HOME/ardesasoftware.com"
+    - export DOCROOT2="$HOME/public_html"
 
     # Restart Passenger after each deploy
     - mkdir -p "$REPO_PATH/tmp"
     - touch "$REPO_PATH/tmp/restart.txt"
 
-    # Write .htaccess in the domain docroot pointing Passenger to this repo
+    # Write .htaccess into any existing docroot(s)
     - |
-      cat > "$DEPLOY_PATH/.htaccess" <<EOF
+      for D in "$DOCROOT1" "$DOCROOT2"; do
+        if [ -d "$D" ]; then
+          mkdir -p "$D"
+          cat > "$D/.htaccess" <<EOF
       PassengerEnabled on
       PassengerAppType node
       PassengerAppRoot $REPO_PATH
@@ -32,5 +36,8 @@ deployment:
       # If your server requires an explicit Node path, uncomment and adjust:
       # PassengerNodejs /opt/cpanel/ea-nodejs18/bin/node
       EOF
+          echo "Wrote Passenger .htaccess to $D"
+        fi
+      done
 
-    - echo "Deployment completed. AppRoot: $REPO_PATH -> Docroot: $DEPLOY_PATH"
+    - echo "Deployment completed. AppRoot: $REPO_PATH"

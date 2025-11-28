@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Sitemap: https://ardesa.com/sitemap.xml
+
+# Disallow admin or internal paths if present
+Disallow: /admin
+Disallow: /internal

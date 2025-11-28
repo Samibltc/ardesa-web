@@ -1,0 +1,36 @@
+---
+deployment:
+  tasks:
+    # Ensure production mode and Node is on PATH (try common EA NodeJS paths)
+    - export NODE_ENV=production
+    - export PATH="/opt/cpanel/ea-nodejs20/bin:/opt/cpanel/ea-nodejs18/bin:/opt/cpanel/ea-nodejs16/bin:$PATH"
+
+    # Log versions for debugging in cPanel deploy output
+    - echo "Node: $(node -v) | npm: $(npm -v)"
+
+    # Install dependencies and build Next.js
+    - npm ci || npm install
+    - npm run build
+
+    # Prepare Passenger (Phusion) config to serve the app from this repo dir
+    - export REPO_PATH="$(pwd)"
+    # Adjust if your domain docroot is different
+    - export DEPLOY_PATH="$HOME/public_html"
+
+    # Restart Passenger after each deploy
+    - mkdir -p "$REPO_PATH/tmp"
+    - touch "$REPO_PATH/tmp/restart.txt"
+
+    # Write .htaccess in the domain docroot pointing Passenger to this repo
+    - |
+      cat > "$DEPLOY_PATH/.htaccess" <<EOF
+      PassengerEnabled on
+      PassengerAppType node
+      PassengerAppRoot $REPO_PATH
+      PassengerStartupFile server.js
+      PassengerAppEnv production
+      # If your server requires an explicit Node path, uncomment and adjust:
+      # PassengerNodejs /opt/cpanel/ea-nodejs18/bin/node
+      EOF
+
+    - echo "Deployment completed. AppRoot: $REPO_PATH -> Docroot: $DEPLOY_PATH"

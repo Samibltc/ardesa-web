@@ -11,6 +11,13 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
     title: "Ardesa Software",
     description: "Ultra modern çözümlerle yüksek performanslı yazılım",
+    icons: {
+        icon: [
+          { url: "/logo-svg.png", type: "image/svg+xml" },
+        ],
+        shortcut: "/logo-svg.png",
+        apple: "/logo-svg.png",
+      },
 };
 
 
